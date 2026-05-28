@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Steal The Brainrot - متجر وسحب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* الحاوية الرئيسية */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: linear-gradient(145deg, #0a0a0f 0%, #0f0f17 100%);
+        }
+
+        /* الرأس مثل إنستغرام */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #000000cc;
+            backdrop-filter: blur(10px);
+            border-bottom: 0.5px solid #2c2c2c;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00ffcc, #0077ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-icons {
+            display: flex;
+            gap: 18px;
+        }
+        .header-icons span {
+            font-size: 22px;
+        }
+
+        /* منطقة الإحصائيات */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: #111116;
+            margin: 8px 12px;
+            border-radius: 28px;
+            border: 0.5px solid #2a2a36;
+        }
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffcc44;
+        }
+        #mps-value {
+            color: #66ff99;
+        }
+
+        /* المحتوى الرئيسي (ياخذ كل المساحة المتبقية) */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            margin-bottom: 60px;
+        }
+
+        /* ========== قسم المتجر ========== */
+        .shop-section {
+            display: none;
+        }
+        .shop-section.active {
+            display: block;
+        }
+        .shop-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-right: 6px;
+        }
+        .packs-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .pack-item {
+            background: #14141e;
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #2d2d3a;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+        .pack-item.active-pack {
+            border: 2px solid #00ffcc;
+            background: #1a1a2a;
+            box-shadow: 0 0 12px #00ffcc44;
+        }
+        .pack-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .pack-emoji {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        .pack-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .pack-cost {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffcc66;
+            background: #00000055;
+            padding: 6px 12px;
+            border-radius: 40px;
+        }
+
+        /* ========== قسم السحب (الدردشة) ========== */
+        .spin-section {
+            display: none;
+        }
+        .spin-section.active {
+            display: block;
+        }
+        .current-pack-card {
+            background: #1a1a28;
+            border-radius: 28px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #ffaa3355;
+        }
+        .spin-btn {
+            background: linear-gradient(95deg, #00c9a7, #1e6aff);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 60px;
+            color: white;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .spin-btn:active {
+            transform: scale(0.97);
+        }
+        .result-area {
+            background: #0b0b12;
+            border-radius: 32px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+            border: 1px solid #2a2a36;
+        }
+        .char-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        .char-rarity {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        .char-power {
+            font-size: 15px;
+            color: #bbb;
+        }
+
+        /* الشريط السفلي مثل إنستغرام */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000000dd;
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 20px 14px;
+            border-top: 0.5px solid #2c2c2c;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.1s;
+        }
+        .nav-item.active {
+            opacity: 1;
+        }
+        .nav-icon {
+            font-size: 28px;
+        }
+        .nav-label {
+            font-size: 11px;
+        }
+
+        /* تلوين الندرات */
+        .Common { border-color: #b0b0b0; }
+        .Rare { border-color: #55ff55; }
+        .Epic { border-color: #aa44ff; }
+        .Legendary { border-color: #ffaa33; }
+        .BrainrotGod { border-color: #ff5555; box-shadow: 0 0 12px #ff5555aa; }
+        .Eternal { border-color: #ff884d; box-shadow: 0 0 12px #ff884d; }
+        .Secret { border-color: #0ff; box-shadow: 0 0 15px cyan; animation: pulse 1s infinite; }
+        .GOAT { border-color: #ff00ff; box-shadow: 0 0 15px fuchsia; animation: rainbow 1s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.01); }
+        }
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg);}
+            100% { filter: hue-rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="header-icons"><span>🔔</span></div>
+        <h1>Brainrot</h1>
+        <div class="header-icons"><span>📩</span><span>➕</span></div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-item"><div class="stat-label">💰 العملات</div><div class="stat-value" id="money-display">100</div></div>
+        <div class="stat-item"><div class="stat-label">⚡ انتاج/ث</div><div class="stat-value" id="mps-value">0</div></div>
+    </div>
+
+    <div class="main-content">
+        <!-- قسم المتجر (شبيه بالريلز) -->
+        <div id="shopSection" class="shop-section active">
+            <div class="shop-title">🛒 المتجر - 30 بكج</div>
+            <div id="packsList" class="packs-scroll"></div>
+        </div>
+
+        <!-- قسم السحب/الدردشة -->
+        <div id="spinSection" class="spin-section">
+            <div class="current-pack-card" id="packInfoCard">
+                <div>📦 البكج الحالي</div>
+                <div style="font-weight:bold; margin-top:6px;" id="selectedPackName">1. بكج البداية</div>
+                <div style="color:#ffcc66;" id="selectedPackCost">💰 10</div>
+            </div>
+            <button class="spin-btn" onclick="performSpin()">🎲 شراء وسحب 🎲</button>
+            <div class="result-area" id="resultArea">
+                <div id="resultIntro" style="color:#aaa;">✨ اضغط زر السحب للحصول على شخصية ✨</div>
+                <div class="char-name" id="resultName"></div>
+                <div class="char-rarity" id="resultRarity" style="display:none;"></div>
+                <div class="char-power" id="resultPower"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item" id="navShop">
+            <div class="nav-icon">🛒</div>
+            <div class="nav-label">المتجر</div>
+        </div>
+        <div class="nav-item" id="navSpin">
+            <div class="nav-icon">🎰</div>
+            <div class="nav-label">السحب</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // بيانات اللاعب
+    let playerMoney = 100;
+    let playerMps = 0;
+    let currentPackId = 1;
+    let currentPackCost = 10;
+    let currentPackName = "1. بكج البداية";
+
+    // قاعدة البيانات كما هي (بدون اضافة شخصيات)
+    const charactersDB = {
+        "Common": [{ name: "Chillin Chili 🌶️", power: 1, label: "1" }],
+        "Rare": [{ name: "Akulini Cactusini 🌵", power: 5, label: "5" }],
+        "Epic": [{ name: "Ecco Cavallo Virtuoso 🐴", power: 75, label: "75" }],
+        "Legendary": [{ name: "Brr Es Teh Patipum 🗿", power: 150, label: "150" }],
+        "BrainrotGod": [
+            { name: "Los Bros 🪵", power: 80000, label: "80K" },
+            { name: "Espressona Signora ☕", power: 90000, label: "90K" },
+            { name: "Centrallucci Nuclearuccci ☢️", power: 105000, label: "105K" },
+            { name: "Torrtuginni Dragonfrutinni 🐉🍓", power: 150000, label: "150K" }
+        ],
+        "Eternal": [{ name: "Gigalitraktos 🕷️", power: 250000, label: "250K" }],
+        "Secret": [
+            { name: "Las Agarrinis 🟥", power: 470000, label: "470K" },
+            { name: "Los Job Jobsitos 🥦", power: 700000, label: "700K" },
+            { name: "Chiclete Bicicleterina 💎", power: 4500000, label: "4.5M" },
+            { name: "La Grande Combinacion 🗿", power: 5000000, label: "5M" },
+            { name: "Yess My Hotspot 🌯", power: 5500000, label: "5.5M" },
+            { name: "Cocoblade 🦎", power: 7500000, label: "7.5M" },
+            { name: "La Christmas Combination 🎄", power: 9000000, label: "9M" },
+            { name: "Ketupat Kepat Prekupat 🔶", power: 10000000, label: "10M" },
+            { name: "Lovey Lovey Bear 🧸🔴", power: 10500000, label: "10.5M" },
+            { name: "Dul Dul Dul 🐒", power: 12000000, label: "12M" },
+            { name: "Canilone dragoni 🐉", power: 50000000, label: "50M" }
+        ],
+        "GOAT": [{ name: "Skibidi Toilet الحقيقي 🚽", power: 999999999, label: "999M" }]
+    };
+
+    // الأسعار مصححة (بكج 30 هو الأغلى)
+    const packsConfig = [
+        { id: 1, name: "بكج البداية", cost: 10, emoji: "🌱" },{ id: 2, name: "المنحوسين", cost: 50, emoji: "🍀" },{ id: 3, name: "مغامري روبلوكس", cost: 200, emoji: "🎮" },{ id: 4, name: "ميمز تيك توك", cost: 1000, emoji: "📱" },{ id: 5, name: "النيون المشع", cost: 5000, emoji: "⚡" },{ id: 6, name: "القلعة الملحمية", cost: 20000, emoji: "🏰" },{ id: 7, name: "المحاربين المطور", cost: 100000, emoji: "⚔️" },{ id: 8, name: "الذهب والكنوز", cost: 500000, emoji: "💰" },{ id: 9, name: "المبرمجين السري", cost: 2000000, emoji: "💻" },{ id: 10, name: "الأثرياء المبتدئين", cost: 10000000, emoji: "💎" },{ id: 11, name: "الطاقة المتفجرة", cost: 50000000, emoji: "💥" },{ id: 12, name: "غزو الفضاء", cost: 250000000, emoji: "🛸" },{ id: 13, name: "النخبة المطور", cost: 1000000000, emoji: "🏅" },{ id: 14, name: "زعماء الماب", cost: 5000000000, emoji: "👑" },{ id: 15, name: "الهكرز المحترفين", cost: 30000000000, emoji: "💀" },{ id: 16, name: "امبراطورية جيجا", cost: 150000000000, emoji: "🏛️" },{ id: 17, name: "الكود الملعون", cost: 800000000000, emoji: "🔮" },{ id: 18, name: "لقطات يوتيوب", cost: 4000000000000, emoji: "📺" },{ id: 19, name: "الأبعاد الرقمية", cost: 20000000000000, emoji: "🌀" },{ id: 20, name: "نهاية العالم", cost: 100000000000000, emoji: "🌋" },{ id: 21, name: "الملياردير المتقدم", cost: 600000000000000, emoji: "💵" },{ id: 22, name: "رقصات التحدي", cost: 3000000000000000, emoji: "🕺" },{ id: 23, name: "الخلود اللانهائي", cost: 15000000000000000, emoji: "♾️" },{ id: 24, name: "حماة المجرة", cost: 80000000000000000, emoji: "🌟" },{ id: 25, name: "ملوك البرينروت", cost: 400000000000000000, emoji: "🧠" },{ id: 26, name: "القوة الأبدية", cost: 2000000000000000000, emoji: "⚡" },{ id: 27, name: "الحظ الأسطوري", cost: 10000000000000000000, emoji: "🍀" },{ id: 28, name: "الأساطير الخالدة", cost: 50000000000000000000, emoji: "📜" },{ id: 29, name: "الغموض الخارق", cost: 1000000000000000000, emoji: "❓" },{ id: 30, name: "الملياردير الخارق", cost: 250000000000000000000, emoji: "🐐" }
+    ];
+
+    function formatNumber(num) {
+        if (num >= 1e18) return (num / 1e18).toFixed(2) + "Q";
+        if (num >= 1e15) return (num / 1e15).toFixed(2) + "QA";
+        if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
+        if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
+        if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
+        if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
+        return num.toString();
+    }
+
+    function updateUI() {
+        document.getElementById('money-display').innerText = formatNumber(playerMoney);
+        document.getElementById('mps-value').innerText = formatNumber(playerMps);
+        document.getElementById('selectedPackName').innerText = currentPackName;
+        document.getElementById('selectedPackCost').innerHTML = `💰 ${formatNumber(currentPackCost)}`;
+        // تحديث البطاقات النشطة في المتجر
+        document.querySelectorAll('.pack-item').forEach(item => {
+            const packId = parseInt(item.getAttribute('data-id'));
+            if (packId === currentPackId) item.classList.add('active-pack');
+            else item.classList.remove('active-pack');
+        });
+    }
+
+    function renderShop() {
+        const container = document.getElementById('packsList');
+        container.innerHTML = '';
+        packsConfig.forEach(pack => {
+            const div = document.createElement('div');
+            div.className = `pack-item ${currentPackId === pack.id ? 'active-pack' : ''}`;
+            div.setAttribute('data-id', pack.id);
+            div.innerHTML = `
+                <div class="pack-info">
+                    <div class="pack-emoji">${pack.emoji}</div>
+                    <div class="pack-name">${pack.name}</div>
+                </div>
+                <div class="pack-cost">💰 ${formatNumber(pack.cost)}</div>
+            `;
+            div.onclick = () => {
+                currentPackId = pack.id;
+                currentPackCost = pack.cost;
+                currentPackName = pack.name;
+                updateUI();
+                renderShop(); // إعادة رسم لتحديد النشاط
+            };
+            container.appendChild(div);
+        });
+    }
+
+    function performSpin() {
+        if (playerMoney < currentPackCost) {
+            alert("❌ العملات غير كافية! اربح أكثر عن طريق السحب.");
+            return;
+        }
+        playerMoney -= currentPackCost;
+
+        let rand = Math.random() * 100;
+        let finalRarity = "Common";
+
+        // نسب الحظ الأصلية (نفس الكود)
+        if (currentPackId <= 5) {
+            if (rand < 8) finalRarity = "Epic";
+            else if (rand < 35) finalRarity = "Rare";
+            else finalRarity = "Common";
+        } else if (currentPackId <= 15) {
+            if (rand < 1) finalRarity = "Secret";
+            else if (rand < 5) finalRarity = "Eternal";
+            else if (rand < 25) finalRarity = "BrainrotGod";
+            else finalRarity = "Epic";
+        } else if (currentPackId <= 25) {
+            if (rand < 5) finalRarity = "Secret";
+            else if (rand < 15) finalRarity = "Eternal";
+            else if (rand < 50) finalRarity = "BrainrotGod";
+            else finalRarity = "Legendary";
+        } else {
+            if (rand < 0.05) finalRarity = "GOAT";
+            else if (rand < 15) finalRarity = "Secret";
+            else if (rand < 40) finalRarity = "Eternal";
+            else finalRarity = "BrainrotGod";
+        }
+
+        const pool = charactersDB[finalRarity];
+        const character = pool[Math.floor(Math.random() * pool.length)];
+        playerMps += character.power;
+
+        // عرض النتيجة
+        const resultIntro = document.getElementById('resultIntro');
+        const resultName = document.getElementById('resultName');
+        const resultRarity = document.getElementById('resultRarity');
+        const resultPower = document.getElementById('resultPower');
+        const resultArea = document.getElementById('resultArea');
+
+        if (resultIntro) resultIntro.style.display = 'none';
+        resultRarity.style.display = 'inline-block';
+        resultArea.className = `result-area ${finalRarity}`;
+        resultName.innerText = character.name;
+        resultRarity.innerText = finalRarity;
+        resultPower.innerText = `✨ يضيف +${character.label}/ثانية ✨`;
+
+        updateUI();
+    }
+
+    // شريط التبديل بين المتجر والسحب
+    function switchTab(tab) {
+        const shopSection = document.getElementById('shopSection');
+        const spinSection = document.getElementById('spinSection');
+        const navShop = document.getElementById('navShop');
+        const navSpin = document.getElementById('navSpin');
+
+        if (tab === 'shop') {
+            shopSection.classList.add('active');
+            spinSection.classList.remove('active');
+            navShop.classList.add('active');
+            navSpin.classList.remove('active');
+        } else {
+            shopSection.classList.remove('active');
+            spinSection.classList.add('active');
+            navShop.classList.remove('active');
+            navSpin.classList.add('active');
+        }
+    }
+
+    document.getElementById('navShop').onclick = () => switchTab('shop');
+    document.getElementById('navSpin').onclick = () => switchTab('spin');
+
+    // توليد العملات التلقائي
+    setInterval(() => {
+        if (playerMps > 0) {
+            playerMoney += playerMps;
+            updateUI();
+        }
+    }, 1000);
+
+    renderShop();
+    updateUI();
+    switchTab('shop');
+</script>
+</body>
+</html>
